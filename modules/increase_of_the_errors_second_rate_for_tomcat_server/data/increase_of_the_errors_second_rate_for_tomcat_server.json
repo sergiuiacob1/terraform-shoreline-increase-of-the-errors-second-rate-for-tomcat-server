@@ -1,0 +1,202 @@
+{
+  "name": "increase_of_the_errors_second_rate_for_tomcat_server",
+  "description": "This incident type refers to an increase in the number of errors per second on a Tomcat server, which could indicate an issue with the server itself, the host, a deployed application, or an application servlet. This could include errors generated when the Tomcat server runs out of memory, can't find a requested file or servlet, or is unable to serve a JSP due to syntax errors in the servlet codebase. This incident type requires immediate attention to diagnose and address the underlying issue.",
+  "params": [
+    {
+      "name": "DEPLOYMENT_NAME",
+      "value": ""
+    },
+    {
+      "name": "TOMCAT_CONFIG_FILE",
+      "value": ""
+    },
+    {
+      "name": "SERVICE_NAME",
+      "value": ""
+    },
+    {
+      "name": "NODE_NAME",
+      "value": ""
+    },
+    {
+      "name": "EXPECTED_TOMCAT_SETTINGS",
+      "value": ""
+    },
+    {
+      "name": "TOMCAT_POD_NAME",
+      "value": ""
+    },
+    {
+      "name": "TOMCAT_APP",
+      "value": ""
+    },
+    {
+      "name": "SERVICE_IP",
+      "value": ""
+    },
+    {
+      "name": "PORT",
+      "value": ""
+    },
+    {
+      "name": "MEMORY_THRESHOLD",
+      "value": ""
+    },
+    {
+      "name": "TOMCAT_CONTAINER_NAME",
+      "value": ""
+    },
+    {
+      "name": "CPU_THRESHOLD",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Increase of the errors/second rate for Tomcat server\nThis incident type refers to an increase in the number of errors per second on a Tomcat server, which could indicate an issue with the server itself, the host, a deployed application, or an application servlet. This could include errors generated when the Tomcat server runs out of memory, can't find a requested file or servlet, or is unable to serve a JSP due to syntax errors in the servlet codebase. This incident type requires immediate attention to diagnose and address the underlying issue."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the status of the Tomcat pod"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl get pods -n ${NAMESPACE} -l app=${TOMCAT_APP}`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the logs of the Tomcat container for any errors"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl logs -n ${NAMESPACE} ${TOMCAT_POD_NAME} -c ${TOMCAT_CONTAINER_NAME}`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the CPU and memory usage of the Tomcat container"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl top pod -n ${NAMESPACE} ${TOMCAT_POD_NAME}`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the network traffic of the Tomcat container"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "container | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE | name=$$TOMCAT_CONTAINER_NAME | `netstat -na`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the health of the Kubernetes cluster nodes where the Tomcat pod is running"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl describe node ${NODE_NAME}`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the status of the Kubernetes services and endpoints"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl get svc,ep -n ${NAMESPACE}`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the status of the Kubernetes ingress controller"
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | limit=1 | random=1 | `kubectl get ingress -n ${NAMESPACE}`"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## The host machine running the Tomcat server is experiencing high CPU or memory usage, causing the server to become unresponsive and generate errors."
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_threshold_check($NODE_NAME, $MEMORY_THRESHOLD, $CPU_THRESHOLD)"
+    },
+    {
+      "name": "cell_18",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## A software update or configuration change was made to the Tomcat server that caused it to malfunction and produce errors."
+    },
+    {
+      "name": "cell_19",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_tomcat_diagnosis($TOMCAT_CONFIG_FILE, $EXPECTED_TOMCAT_SETTINGS, $TOMCAT_POD_NAME)"
+    },
+    {
+      "name": "cell_20",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the server logs to determine the cause of the errors and identify any patterns or trends that may be contributing to the increase in errors."
+    },
+    {
+      "name": "cell_21",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_get_tomcat_logs($TOMCAT_POD_NAME, $TOMCAT_CONTAINER_NAME)"
+    },
+    {
+      "name": "cell_22",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the deployed application to ensure that it is functioning correctly and that there are no coding errors or configuration issues."
+    },
+    {
+      "name": "cell_23",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "pod | k8s_cluster_name=$K8S_CLUSTER_NAME | app='shoreline' | random=1 | limit=1 | invoke_check_application_status($DEPLOYMENT_NAME, $SERVICE_NAME, $SERVICE_IP, $PORT)"
+    }
+  ]
+}
